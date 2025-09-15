@@ -4,7 +4,7 @@ import {  useEffect, useState } from 'react';
 import Editor from '@monaco-editor/react';
 import Loader from './component/Loader';
 
-const socket = io('https://real-time-collaborative-code-editor-i9bo.onrender.com');
+const socket = io('https://real-timecollaborative-code-editor.onrender.com');
 const App = () => {
   const [joined, setJoined] = useState(false);
   const [roomId, setRoomId] = useState('');
@@ -125,7 +125,7 @@ return (
     <div className="sidebar">
       <div className="room-info">
         <h2>Room ID: {roomId}</h2>
-        <button className="copy-btn" onClick={copyRoomId}>Copy Id
+        <button className="copy-button" onClick={copyRoomId}>Copy Id
           
 
         </button>

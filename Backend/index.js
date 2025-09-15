@@ -7,7 +7,7 @@ import path from "path";
 const app = express();
 const server = http.createServer(app);
 
-const url = `https://real-time-collaborative-code-editor-i9bo.onrender.com`;
+const url = `https://real-timecollaborative-code-editor.onrender.com`;
 const interval = 30000;
 
 function reloadWebsite() {
