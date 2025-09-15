@@ -4,7 +4,7 @@ import {  useEffect, useState } from 'react';
 import Editor from '@monaco-editor/react';
 import Loader from './component/Loader';
 
-const socket = io('http://localhost:5000');
+const socket = io('https://real-time-collaborative-code-editor-i9bo.onrender.com');
 const App = () => {
   const [joined, setJoined] = useState(false);
   const [roomId, setRoomId] = useState('');
