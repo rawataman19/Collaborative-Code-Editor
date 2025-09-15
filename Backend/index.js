@@ -1,9 +1,26 @@
+import axios from "axios";
 import express from "express";
 import http from "http";
 import { Server } from "socket.io";
 
 const app = express();
 const server = http.createServer(app);
+
+const url = `https://render-hosting-se2b.onrender.com`;
+const interval = 30000;
+
+function reloadWebsite() {
+  axios
+    .get(url)
+    .then((response) => {
+      console.log("website reloded");
+    })
+    .catch((error) => {
+      console.error(`Error : ${error.message}`);
+    });
+}
+
+setInterval(reloadWebsite, interval);  
 
 const io = new Server(server, {
   cors: {
@@ -14,7 +31,6 @@ const io = new Server(server, {
 const rooms = new Map();
 
 io.on("connection", (socket) => {
-  console.log("user connected", socket.id);
   let currentRoom = null;
   let currentUser = null;
 
@@ -68,6 +84,23 @@ socket.on("languageChange", ({ roomId, language }) => {
   socket.to(roomId).emit("languageUpdate", { language });
 });
  
+socket.on("runCode", async({ roomId, code, language,version }) => {
+  if(rooms.has(roomId)){
+    const room = rooms.get(roomId);
+    const response= await axios.post("https://emkc.org/api/v2/piston/execute", {
+      language,
+      version,
+      files: [
+        {
+          content: code
+        }
+      ] 
+    });
+    room.output = response.data.output;
+    io.to(roomId).emit("codeOutput", response.data);
+  }
+});
+
 
 
   // Disconnect
