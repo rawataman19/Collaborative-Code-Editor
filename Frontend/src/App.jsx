@@ -2,6 +2,7 @@ import './App.css';
 import io from 'socket.io-client';
 import {  useEffect, useState } from 'react';
 import Editor from '@monaco-editor/react';
+import Loader from './component/Loader';
 
 const socket = io('http://localhost:5000');
 const App = () => {
@@ -12,6 +13,9 @@ const App = () => {
   const [code, setCode] = useState("// start coding");
   const [users, setUsers] = useState([]);
   const [typing, setTyping] = useState(false);
+  const [output , setOutput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const version = "*";
 
   const [copySuccess, setCopySuccess] = useState('');
 
@@ -33,12 +37,17 @@ useEffect(() => {
   socket.on("languageUpdate", ({ language }) => {
     setLanguage(language);
   });
+  socket.on("codeOutput", (data) => {
+    setLoading(false);
+    setOutput(data.run.output);
+  } );
 
   return () => {
     socket.off('userJoined');
     socket.off("codeUpdate");
     socket.off("userTyping");
     socket.off("languageUpdate");
+    socket.off("codeOutput");
   };
 }, []);
 
@@ -94,6 +103,11 @@ useEffect(() => {
     socket.emit("languageChange", { roomId, language: newLanguage });
   };
 
+  const runCode = () => {
+    setLoading(true);
+    socket.emit("runCode", { roomId, code, language, version });
+  }
+
   
   if(!joined) {
     return <div className='join-container'>
@@ -121,7 +135,7 @@ return (
       <h3>Connected Users</h3>
       <ul>
         {users.map((user, index) => (
-          <li key={index}>{user.slice(0, 10)}...</li>
+          <li key={index}> {user.length>8 ? user.slice(0, 8) + "..." : user}</li>
         ))}
       </ul>
 
@@ -133,6 +147,15 @@ return (
         <option value="javascript">JavaScript</option>
         <option value="python">Python</option>
         <option value="java">Java</option>
+        <option value="c">C</option>
+        <option value="ruby">Ruby</option>
+        <option value="go">Go</option>
+        <option value="php">PHP</option>
+        <option value="swift">Swift</option>
+        <option value="typescript">TypeScript</option>
+        <option value="kotlin">Kotlin</option>
+        <option value="rust">Rust</option>
+        <option value="scala">Scala</option>
       </select>
 
       <button className="leave-button" onClick={leaveRoom}>Leave Room</button>
@@ -140,7 +163,7 @@ return (
 
     <div className="editor-wrapper">
       <Editor
-        height="100vh"
+        height="60vh"
         defaultLanguage={language}
         language={language}
         value={code}
@@ -149,8 +172,14 @@ return (
         options={{
           minimap: { enabled: false },
           fontSize: 16,
+          tabSize: 2,
+          automaticLayout: true,
         }}
       />
+      <button className="run-button" onClick={runCode}>Run Code</button>
+      {loading ? <Loader />:
+      <textarea className='output-area' value={output} readOnly placeholder='Output will be displayed here...'></textarea>
+    }
     </div>
   </div>
 );
